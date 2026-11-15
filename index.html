@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Hay mesa. El cartel de la puerta, en la web de tu restaurante</title>
+<meta name="description" content="Demostración: la web del restaurante dice si hay mesa ahora, la sala lo cambia con un toque y el dueño ve cada mes las mesas que no perdió.">
+<meta name="theme-color" content="#16211C">
+<link rel="preload" href="fuentes/young-serif-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fuentes/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:"Young Serif";font-style:normal;font-weight:400;font-display:swap;
+  src:url(fuentes/young-serif-latin-ext.woff2) format("woff2");
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Young Serif";font-style:normal;font-weight:400;font-display:swap;
+  src:url(fuentes/young-serif-latin.woff2) format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Schibsted Grotesk";font-style:normal;font-weight:400 900;font-display:swap;
+  src:url(fuentes/schibsted-grotesk-latin-ext.woff2) format("woff2");
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Schibsted Grotesk";font-style:normal;font-weight:400 900;font-display:swap;
+  src:url(fuentes/schibsted-grotesk-latin.woff2) format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+
+:root{
+  --botella:#10382B;      /* el verde de la casa */
+  --botella-2:#0A281E;
+  --hoja:#1B7F4B;         /* cartel: hay mesa */
+  --ambar:#EFAE2C;        /* cartel: últimas mesas */
+  --ambar-tinta:#2B1D00;
+  --rojo:#B3302B;         /* cartel: completo */
+  --pizarra:#5B665F;      /* cartel sin actualizar */
+  --tinta:#16211C;
+  --gris:#55625B;
+  --hueso:#F1F3EE;
+  --linea:#DBE1DA;
+  --menta:#CFE0D6;        /* texto secundario sobre verde */
+  --titular:"Young Serif",Georgia,"Times New Roman",serif;
+  --texto:"Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --pestanas:60px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:var(--texto);font-size:16px;line-height:1.5;color:var(--tinta);background:#fff;-webkit-font-smoothing:antialiased}
+p,h1,h2,h3,ul,ol{margin:0}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+[hidden]{display:none !important}
+:focus-visible{outline:3px solid #2F6FED;outline-offset:2px}
+
+/* ───── Lo que es de la demostración (no del restaurante) ───── */
+.demo-cabecera,.rotulo{display:none}
+.aviso-demo{position:sticky;top:0;z-index:30;background:var(--tinta);color:#fff;font-size:13.5px;line-height:1.3;font-weight:500;
+  padding:calc(11px + env(safe-area-inset-top)) 16px 11px}
+.pestanas{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(3,1fr);
+  background:var(--tinta);padding-bottom:env(safe-area-inset-bottom)}
+.pestanas button{position:relative;height:var(--pestanas);border:0;background:none;color:#AEBBB3;font-size:15px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;gap:8px}
+.pestanas button[aria-current="true"]{color:#fff}
+.pestanas button[aria-current="true"]::before{content:"";position:absolute;top:0;left:22%;right:22%;height:3px;border-radius:0 0 3px 3px;background:#fff}
+.punto{width:11px;height:11px;border-radius:50%;background:var(--hoja);box-shadow:0 0 0 2px rgba(255,255,255,.9)}
+.punto.ultimas{background:var(--ambar)}.punto.completo{background:var(--rojo)}.punto.caducado{background:var(--pizarra)}
+.cuantos-esperan{min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#fff;color:var(--tinta);font-size:13px;font-weight:700;
+  display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.tostada{position:fixed;left:16px;right:16px;bottom:calc(var(--pestanas) + env(safe-area-inset-bottom) + 12px);z-index:40;margin:0 auto;max-width:398px;
+  background:var(--tinta);color:#fff;font-size:15px;line-height:1.4;padding:13px 16px;border-radius:12px;
+  box-shadow:0 12px 30px -10px rgba(10,20,15,.6);opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .2s,transform .2s}
+.tostada.visible{opacity:1;transform:none}
+
+main{padding-bottom:calc(var(--pestanas) + env(safe-area-inset-bottom))}
+.vista{display:none}
+.vista.activa{display:block}
+
+/* ───── Botones comunes ───── */
+.boton{display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;padding:8px 20px;border:0;border-radius:12px;
+  font-size:17px;font-weight:600;line-height:1.2;text-align:center;text-decoration:none;transition:transform .12s}
+.boton:active{transform:scale(.985)}
+.boton.principal{background:var(--botella);color:#fff}
+.boton.secundario{background:#fff;color:var(--botella);box-shadow:inset 0 0 0 1.5px var(--botella)}
+.boton.texto{background:none;color:var(--botella);min-height:44px;font-size:16px;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+
+/* ───── La web del restaurante ───── */
+.pantalla{container-type:inline-size}
+.web{background:#fff}
+.web-arriba{color:#fff;background-color:var(--botella);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cg fill='none' stroke='%23fff' stroke-opacity='.06' stroke-width='1.5'%3E%3Ccircle cx='32' cy='32' r='32'/%3E%3Ccircle cx='0' cy='0' r='32'/%3E%3Ccircle cx='64' cy='0' r='32'/%3E%3Ccircle cx='0' cy='64' r='32'/%3E%3Ccircle cx='64' cy='64' r='32'/%3E%3C/g%3E%3C/svg%3E")}
+.web-cabecera{display:flex;align-items:baseline;justify-content:space-between;padding:20px 20px 0}
+.web-marca{font-family:var(--titular);font-size:25px;line-height:1}
+.web-cabecera nav{display:flex;gap:20px}
+.web-cabecera nav a{color:#fff;font-size:15px;font-weight:500;text-decoration:none;padding:6px 0}
+.portada{padding:46px 20px 0}
+.portada h1{font-family:var(--titular);font-weight:400;font-size:clamp(30px,10.2vw,41px);font-size:clamp(30px,10.2cqw,41px);line-height:1.06;letter-spacing:-.012em;max-width:9.5em}
+.portada .lema{font-size:17px;line-height:1.5;color:var(--menta);margin-top:14px;max-width:31ch}
+
+/* El cartel: una placa esmaltada, como la de la puerta */
+.placa{position:relative;margin:36px 0 -64px;padding:28px 26px 24px;border-radius:18px;text-align:center;color:#fff;background:var(--hoja);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 22px 34px -20px rgba(5,22,15,.7);transform-origin:50% 50%}
+.placa::before{content:"";position:absolute;inset:7px;border:1.5px solid rgba(255,255,255,.5);border-radius:12px;pointer-events:none}
+.tornillo{position:absolute;width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.82);box-shadow:inset 0 -1px 1px rgba(0,0,0,.35)}
+.tornillo:nth-of-type(1){top:15px;left:15px}.tornillo:nth-of-type(2){top:15px;right:15px}
+.tornillo:nth-of-type(3){bottom:15px;left:15px}.tornillo:nth-of-type(4){bottom:15px;right:15px}
+.placa-titulo{font-family:var(--titular);font-size:clamp(27px,9.4vw,38px);font-size:clamp(27px,9.4cqw,38px);line-height:1.05;letter-spacing:-.01em}
+.placa-detalle{font-size:16.5px;line-height:1.4;margin-top:9px;font-weight:500}
+.placa-pie{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;line-height:1.3;margin-top:12px;opacity:.9}
+.vivo{width:7px;height:7px;border-radius:50%;background:currentColor;animation:vivo 2.4s ease-in-out infinite}
+@keyframes vivo{50%{opacity:.25}}
+.placa.ultimas{background:var(--ambar);color:var(--ambar-tinta)}
+.placa.ultimas::before{border-color:rgba(43,29,0,.4)}
+.placa.ultimas .tornillo{background:rgba(43,29,0,.55);box-shadow:none}
+.placa.completo{background:var(--rojo)}
+.placa.caducado{background:var(--pizarra)}
+
+.acciones{display:grid;gap:10px;padding:92px 20px 0}
+.mi-turno{border-radius:18px;padding:20px 20px 10px;background:var(--hueso)}
+.mi-turno.lista-ya{padding-bottom:22px}
+.mi-turno-titulo{font-family:var(--titular);font-size:24px;line-height:1.12}
+.mi-turno p + p{margin-top:8px}
+.mi-turno .boton{margin-top:6px;justify-content:flex-start;padding-left:0;width:auto}
+.mi-turno.lista-ya{background:var(--hoja);color:#fff}
+.mi-turno.lista-ya .boton{color:#fff}
+
+.apuntarse{display:grid;gap:8px;padding:18px;border-radius:18px;background:var(--hueso)}
+.apuntarse label,.cuantos > span{font-size:15px;font-weight:600}
+.apuntarse input{width:100%;height:52px;border-radius:12px;border:1.5px solid #B9C4BC;background:#fff;padding:0 14px;font-size:17px}
+.apuntarse input:focus{outline:none;border-color:var(--botella);box-shadow:0 0 0 3px rgba(27,127,75,.25)}
+.apuntarse .error{color:#9C2420;font-size:14.5px;font-weight:500}
+.cuantos{display:flex;align-items:center;justify-content:space-between;margin:6px 0}
+.contador{display:flex;align-items:center;gap:4px}
+.contador button{width:46px;height:46px;border-radius:50%;border:1.5px solid #B9C4BC;background:#fff;font-size:24px;line-height:1;font-weight:500;display:grid;place-items:center}
+.contador output{min-width:38px;text-align:center;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.apuntarse .boton.principal{margin-top:8px}
+
+.web-seccion{padding:52px 20px 0;scroll-margin-top:52px}
+.web-seccion h2{font-family:var(--titular);font-weight:400;font-size:29px;line-height:1.1;letter-spacing:-.01em}
+.web-seccion .entrada{color:var(--gris);margin-top:6px}
+
+.afluencia{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:22px}
+.afluencia > *{min-width:0}
+.turno h3{font-size:15px;font-weight:600}
+.barras{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;align-items:end;height:104px;margin-top:22px}
+.barra{position:relative;border-radius:6px 6px 2px 2px;background:#BCD9C8;min-height:6px}
+.barra.n2{background:#5C9F7C}.barra.n3{background:var(--botella)}
+.barra.ahora{outline:2px solid var(--tinta);outline-offset:2px}
+.barra.ahora::after{content:"ahora";position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);font-size:12px;font-weight:700}
+.horas{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:7px;font-size:13px;color:var(--gris);text-align:center;white-space:nowrap}
+.leyenda{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:18px;font-size:14px;color:var(--gris)}
+.leyenda span{display:inline-flex;align-items:center;gap:7px}
+.leyenda i{width:11px;height:11px;border-radius:3px;background:#BCD9C8}
+.leyenda span:nth-child(2) i{background:#5C9F7C}.leyenda span:nth-child(3) i{background:var(--botella)}
+.consejo{margin-top:18px;padding:15px 16px;border-radius:12px;background:var(--hueso);font-size:16px;line-height:1.45}
+
+.carta{list-style:none;padding:0;margin-top:14px}
+.carta li{display:grid;grid-template-columns:1fr auto;column-gap:18px;padding:15px 0;border-top:1px solid var(--linea)}
+.carta li:first-child{border-top:0}
+.carta b{font-family:var(--titular);font-weight:400;font-size:19.5px;line-height:1.2}
+.carta span{grid-column:1;color:var(--gris);font-size:15px;line-height:1.4;margin-top:3px}
+.carta em{grid-column:2;grid-row:1;font-style:normal;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;padding-top:2px}
+.web-seccion > .boton{margin-top:12px}
+.datos{margin-top:16px;display:grid;gap:18px}
+.datos h3{font-size:15px;font-weight:600}
+.datos p{color:var(--gris)}
+.web-pie{margin-top:56px;padding:30px 20px 34px;background:var(--botella);color:var(--menta);font-size:15px}
+.web-pie .web-marca{display:block;color:#fff;margin-bottom:10px}
+
+/* ───── El móvil de la sala ───── */
+.sala{background:var(--hueso);padding:0 16px 28px;min-height:calc(100vh - 44px - var(--pestanas));min-height:calc(100dvh - 44px - var(--pestanas))}
+.sala-cabecera{display:flex;justify-content:space-between;align-items:baseline;padding:20px 4px 0;font-size:15px}
+.sala-cabecera strong{font-weight:700}
+.sala-cabecera time{font-weight:600}
+.sala h2{font-size:25px;line-height:1.15;font-weight:700;letter-spacing:-.015em;margin:18px 4px 14px}
+.cartel-botones{display:grid;gap:10px}
+.cartel-boton{display:grid;grid-template-columns:auto 1fr auto;align-items:center;column-gap:14px;width:100%;min-height:84px;padding:10px 20px;
+  border:0;border-radius:18px;background:#fff;box-shadow:0 0 0 1px var(--linea);text-align:left;transition:transform .12s}
+.cartel-boton:active{transform:scale(.985)}
+.cartel-boton .luz{width:16px;height:16px;border-radius:50%;background:var(--hoja)}
+.cartel-boton[data-cartel="ultimas"] .luz{background:var(--ambar)}
+.cartel-boton[data-cartel="completo"] .luz{background:var(--rojo)}
+.cartel-boton .nombre{display:block;font-family:var(--titular);font-size:25px;line-height:1.1}
+.cartel-boton .sub{display:block;font-size:14px;font-weight:500;margin-top:4px}
+.cartel-boton .sub:empty{display:none}
+.cartel-boton svg{width:28px;height:28px;visibility:hidden}
+.cartel-boton[aria-pressed="true"]{color:#fff;box-shadow:none;background:var(--hoja)}
+.cartel-boton[aria-pressed="true"][data-cartel="ultimas"]{background:var(--ambar);color:var(--ambar-tinta)}
+.cartel-boton[aria-pressed="true"][data-cartel="completo"]{background:var(--rojo)}
+.cartel-boton[aria-pressed="true"].caducado{background:var(--pizarra);color:#fff}
+.cartel-boton[aria-pressed="true"] .luz{background:currentColor}
+.cartel-boton[aria-pressed="true"] svg{visibility:visible}
+
+.proxima{margin:16px 4px 0}
+.proxima p{font-size:15px;font-weight:600;margin-bottom:9px}
+.fichas{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.ficha{min-height:46px;padding:0 4px;border:0;border-radius:22px;background:#fff;box-shadow:0 0 0 1px var(--linea);font-size:15px;font-weight:600}
+.ficha[aria-pressed="true"]{background:var(--tinta);color:#fff;box-shadow:none}
+
+.frescura{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin:18px 0 0;padding:0 4px;font-size:14.5px;line-height:1.4;color:var(--gris)}
+.frescura.caducada{padding:12px 12px 12px 14px;border-radius:12px;background:#FFEDBF;color:#4A3500}
+.boton-chico{min-height:44px;padding:0 16px;border:0;border-radius:12px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--botella);color:var(--botella);font-size:15px;font-weight:600;white-space:nowrap}
+.boton-chico.lleno{background:var(--botella);color:#fff;box-shadow:none}
+.boton-chico.sin{background:none;box-shadow:none;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px;padding:0 6px}
+
+.sala h3{font-size:18px;font-weight:700;margin:32px 4px 10px;display:flex;align-items:center;gap:8px}
+.sala h3 .cuantos-esperan{background:var(--tinta);color:#fff}
+.espera{list-style:none;padding:0;display:grid;gap:8px}
+.espera li{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:12px 12px 12px 16px;border-radius:14px;background:#fff;box-shadow:0 0 0 1px var(--linea)}
+.espera li.nueva{animation:nueva 1.6s ease-out}
+@keyframes nueva{0%{background:#BFE3CE;transform:translateY(6px)}25%{transform:none}100%{background:#fff}}
+.espera .quien{font-size:17px;font-weight:600;line-height:1.25}
+.espera .dato{font-size:14px;color:var(--gris)}
+.espera .fila-acciones{display:flex;align-items:center;gap:4px}
+.vacio{margin:0 4px;color:var(--gris);font-size:15px}
+
+.demo-caja{margin-top:36px;padding:16px;border-radius:16px;background:var(--tinta);color:#fff}
+.demo-caja p{font-size:14px;line-height:1.4;color:#C5D0C9;margin-bottom:12px}
+.demo-caja div{display:flex;flex-wrap:wrap;gap:8px}
+.demo-caja button{min-height:44px;padding:0 14px;border-radius:12px;border:1.5px solid rgba(255,255,255,.6);background:none;color:#fff;font-size:15px;font-weight:600}
+
+/* ───── El resumen del dueño ───── */
+.resumen{padding:28px 20px 34px;background:#fff}
+.resumen h1{font-family:var(--titular);font-weight:400;font-size:30px;line-height:1.1;letter-spacing:-.01em;text-wrap:balance}
+.resumen .entrada{color:var(--gris);margin-top:8px}
+.cuenta{list-style:none;padding:0;margin-top:20px}
+.cuenta li{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:baseline;padding:13px 0;border-top:1px solid var(--linea);line-height:1.35}
+.cuenta li:first-child{border-top:0}
+.cuenta b{font-size:20px;font-weight:700}
+.total{margin-top:10px;padding:24px 22px 22px;border-radius:18px;background:var(--botella);color:#fff}
+.total p{color:var(--menta)}
+.total strong{display:block;font-size:46px;font-weight:800;line-height:1;letter-spacing:-.025em;margin:12px 0 12px}
+.ticket{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.22);font-size:15px;color:var(--menta)}
+.ticket-campo{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;color:#fff;font-weight:600}
+.ticket input{width:72px;height:46px;border:0;border-radius:10px;background:#fff;color:var(--tinta);font-size:18px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+.ticket input:focus-visible{outline-color:#fff}
+.ticket input{-moz-appearance:textfield;appearance:textfield}
+.ticket input::-webkit-inner-spin-button,.ticket input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.resumen h2{font-family:var(--titular);font-weight:400;font-size:25px;line-height:1.12;margin-top:44px}
+.semana{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-items:end;height:128px;margin-top:30px}
+.semana div{position:relative;border-radius:6px 6px 2px 2px;background:var(--botella);min-height:3px}
+.semana div.flojo{background:#BCD9C8}
+.semana div::after{content:attr(data-n);position:absolute;bottom:calc(100% + 5px);left:0;right:0;text-align:center;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.semana-dias{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:8px;text-align:center;font-size:14px;color:var(--gris)}
+.resumen .nota{margin-top:16px}
+.incluye{list-style:none;padding:0;margin-top:12px}
+.incluye li{padding:13px 0;border-top:1px solid var(--linea)}
+.incluye li:first-child{border-top:0}
+
+/* ───── Tableta ───── */
+@media (min-width:600px){
+  body{background:#E5E9E2}
+  main{max-width:430px;margin:0 auto;box-shadow:0 0 0 1px var(--linea)}
+  .vista{background:#fff}
+}
+
+/* ───── Ordenador: las tres pantallas a la vez ───── */
+@media (min-width:1080px){
+  .aviso-demo,.pestanas{display:none}
+  .demo-cabecera{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;max-width:1322px;margin:0 auto;padding:34px 40px 26px}
+  .demo-cabecera strong{display:block;font-size:30px;line-height:1.1;font-weight:800;letter-spacing:-.02em}
+  .demo-cabecera p{font-size:17px;color:var(--gris)}
+  .demo-cabecera div p{margin-top:4px;color:var(--tinta)}
+  main{display:grid;grid-template-columns:repeat(3,390px);justify-content:center;gap:36px;max-width:none;padding:0 32px 48px;box-shadow:none}
+  .vista,.vista.activa{display:block;background:none}
+  .rotulo{display:block;font-size:16px;font-weight:600;margin:0 0 12px 10px}
+  .marco{height:min(800px,calc(100vh - 200px));min-height:580px;border:10px solid var(--tinta);border-radius:42px;overflow:hidden;background:#fff;
+    box-shadow:0 34px 60px -34px rgba(22,33,28,.55)}
+  .pantalla{height:100%;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+  .pantalla::-webkit-scrollbar{display:none}
+  .sala{min-height:100%}
+  .tostada{bottom:28px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .vivo,.espera li.nueva{animation:none}
+  .boton,.cartel-boton,.tostada{transition:none}
+}
+</style>
+</head>
+<body>
+
+<header class="demo-cabecera">
+  <div>
+    <strong>Hay mesa</strong>
+    <p>El cartel de la puerta, en la web de tu restaurante.</p>
+  </div>
+  <p>Demostración con datos de ejemplo</p>
+</header>
+
+<p class="aviso-demo" id="aviso">
+  <span data-vista="cliente">Esto ve tu cliente en tu web. Cámbialo en Sala.</span>
+  <span data-vista="sala" hidden>Esto toca tu equipo desde su móvil. Míralo en Cliente.</span>
+  <span data-vista="resumen" hidden>Esto te llega cada mes. Las cifras son de ejemplo.</span>
+</p>
+
+<main>
+
+  <!-- 1. La web del restaurante, como la ve el cliente -->
+  <section class="vista activa" id="vista-cliente" aria-label="Lo que ve el cliente">
+    <p class="rotulo">Esto ve tu cliente en tu web</p>
+    <div class="marco"><div class="pantalla web">
+
+      <div class="web-arriba">
+        <div class="web-cabecera">
+          <span class="web-marca" data-local>La Loza</span>
+          <nav aria-label="Secciones">
+            <a href="#carta">Carta</a>
+            <a href="#horario">Horario</a>
+          </nav>
+        </div>
+        <div class="portada">
+          <h1>Brasa, arroces y sobremesa larga.</h1>
+          <p class="lema">Casa de comidas junto al mercado. Producto de lonja y de huerta, cocinado sin prisa.</p>
+          <div class="placa hay" id="placa" role="status">
+            <i class="tornillo"></i><i class="tornillo"></i><i class="tornillo"></i><i class="tornillo"></i>
+            <p class="placa-titulo" id="placa-titulo">Hay mesa ahora</p>
+            <p class="placa-detalle" id="placa-detalle">Ven cuando quieras.</p>
+            <p class="placa-pie" id="placa-pie"><i class="vivo"></i><span id="placa-hora">Lo ha marcado la sala hace 3 min</span></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="acciones">
+        <div class="mi-turno" id="mi-turno" hidden>
+          <p class="mi-turno-titulo" id="mi-turno-titulo"></p>
+          <p id="mi-turno-texto"></p>
+          <button class="boton texto" type="button" data-accion="salir">Salir de la lista</button>
+        </div>
+        <button class="boton principal" type="button" id="accion-1" data-accion="wa">Reservar por WhatsApp</button>
+        <form class="apuntarse" id="apuntarse" hidden novalidate>
+          <label for="ap-nombre">Tu nombre</label>
+          <input id="ap-nombre" type="text" autocomplete="given-name" maxlength="24" enterkeyhint="next">
+          <p class="error" id="ap-error" hidden>Escribe tu nombre para poder avisarte.</p>
+          <div class="cuantos">
+            <span id="ap-cuantos">Cuántos sois</span>
+            <div class="contador" role="group" aria-labelledby="ap-cuantos">
+              <button type="button" data-accion="menos" aria-label="Una persona menos">−</button>
+              <output id="ap-personas">2</output>
+              <button type="button" data-accion="mas" aria-label="Una persona más">+</button>
+            </div>
+          </div>
+          <label for="ap-movil">Tu móvil, para avisarte por WhatsApp</label>
+          <input id="ap-movil" type="tel" inputmode="tel" autocomplete="tel" maxlength="15" placeholder="600 000 000" enterkeyhint="done">
+          <button class="boton principal" type="submit">Apuntarme</button>
+          <button class="boton texto" type="button" data-accion="cerrar-form">Ahora no</button>
+        </form>
+        <button class="boton secundario" type="button" id="accion-2" data-accion="llamar">Llamar</button>
+      </div>
+
+      <section class="web-seccion" id="cuando">
+        <h2>Cuándo venir</h2>
+        <p class="entrada" id="cuando-dia">Así suele estar un sábado.</p>
+        <div class="afluencia" id="afluencia" role="img" aria-label="Afluencia habitual por horas"></div>
+        <p class="leyenda"><span><i></i>Tranquilo</span><span><i></i>Animado</span><span><i></i>Lleno</span></p>
+        <p class="consejo" id="consejo"></p>
+      </section>
+
+      <section class="web-seccion" id="carta">
+        <h2>De la carta</h2>
+        <ul class="carta">
+          <li><b>Ensaladilla de gamba roja</b><em>11 €</em><span>Con piparra y regañás.</span></li>
+          <li><b>Croquetas de jamón ibérico</b><em>9 €</em><span>Seis, de bechamel hecha con leche fresca.</span></li>
+          <li><b>Pulpo a la brasa</b><em>19 €</em><span>Sobre patata rota y pimentón de la Vera.</span></li>
+          <li><b>Arroz del senyoret</b><em>18 €</em><span>Gamba, sepia y rape, todo pelado. Por persona, mínimo dos.</span></li>
+          <li><b>Chuletón de vaca madurada</b><em>62 €/kg</em><span>A la brasa de encina, con pimientos asados.</span></li>
+          <li><b>Tarta de queso al horno</b><em>7 €</em><span>Templada y cremosa.</span></li>
+        </ul>
+        <button class="boton secundario" type="button" data-accion="carta">Ver la carta completa</button>
+      </section>
+
+      <section class="web-seccion" id="horario">
+        <h2>Horario y dirección</h2>
+        <div class="datos">
+          <div>
+            <h3>Abrimos todos los días</h3>
+            <p>Comidas de 13:00 a 16:00.<br>Cenas de 20:00 a 23:30.</p>
+          </div>
+          <div>
+            <h3>Calle del Mercado, 12</h3>
+            <p>A dos minutos de la plaza.</p>
+          </div>
+        </div>
+        <button class="boton secundario" type="button" data-accion="mapa">Cómo llegar</button>
+      </section>
+
+      <footer class="web-pie">
+        <span class="web-marca" data-local>La Loza</span>
+        <p>Casa de comidas. Calle del Mercado, 12.</p>
+      </footer>
+
+    </div></div>
+  </section>
+
+  <!-- 2. El móvil de la sala -->
+  <section class="vista" id="vista-sala" aria-label="Lo que toca la sala">
+    <p class="rotulo">Esto toca tu equipo desde su móvil</p>
+    <div class="marco"><div class="pantalla sala">
+
+      <div class="sala-cabecera">
+        <span><strong>Sala</strong> de <span data-local>La Loza</span></span>
+        <time id="reloj">21:14</time>
+      </div>
+
+      <h2>¿Cómo está la sala?</h2>
+      <div class="cartel-botones">
+        <button class="cartel-boton" type="button" data-accion="cartel" data-cartel="hay" aria-pressed="true">
+          <i class="luz"></i><span><span class="nombre">Hay mesa</span><span class="sub"></span></span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+        </button>
+        <button class="cartel-boton" type="button" data-accion="cartel" data-cartel="ultimas" aria-pressed="false">
+          <i class="luz"></i><span><span class="nombre">Últimas mesas</span><span class="sub"></span></span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+        </button>
+        <button class="cartel-boton" type="button" data-accion="cartel" data-cartel="completo" aria-pressed="false">
+          <i class="luz"></i><span><span class="nombre">Completo</span><span class="sub"></span></span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+        </button>
+      </div>
+
+      <div class="proxima" id="proxima" hidden>
+        <p>¿Cuándo se libera la próxima mesa?</p>
+        <div class="fichas">
+          <button class="ficha" type="button" data-accion="proxima" data-min="15">15 min</button>
+          <button class="ficha" type="button" data-accion="proxima" data-min="30">30 min</button>
+          <button class="ficha" type="button" data-accion="proxima" data-min="45">45 min</button>
+          <button class="ficha" type="button" data-accion="proxima" data-min="">No sé</button>
+        </div>
+      </div>
+
+      <div class="frescura" id="frescura">
+        <p id="frescura-texto"></p>
+        <button class="boton-chico" type="button" data-accion="renovar">Sigue igual</button>
+      </div>
+
+      <h3>Lista de espera <span class="cuantos-esperan" id="cuantos-lista" hidden>0</span></h3>
+      <ul class="espera" id="espera"></ul>
+      <p class="vacio" id="espera-vacia">Nadie esperando. Cuando marques Completo, tus clientes podrán apuntarse desde la web.</p>
+
+      <div class="demo-caja">
+        <p>Solo para la demostración: comprueba qué pasa si a la sala se le olvida el cartel.</p>
+        <div>
+          <button type="button" data-accion="adelantar">Adelantar 45 minutos</button>
+          <button type="button" data-accion="reiniciar">Empezar de cero</button>
+        </div>
+      </div>
+
+    </div></div>
+  </section>
+
+  <!-- 3. El resumen del dueño -->
+  <section class="vista" id="vista-resumen" aria-label="Lo que recibe el dueño">
+    <p class="rotulo">Esto te llega cada mes (cifras de ejemplo)</p>
+    <div class="marco"><div class="pantalla resumen">
+
+      <h1><span id="mes">Noviembre</span> en <span data-local>La Loza</span></h1>
+      <p class="entrada">Lo que hizo el cartel por ti este mes.</p>
+
+      <ul class="cuenta">
+        <li><span>Veces que alguien miró si había mesa</span><b>1.312</b></li>
+        <li><span>Reservas por WhatsApp desde la web</span><b>143</b></li>
+        <li><span>Servicios en los que marcaste Completo</span><b>23</b></li>
+        <li><span>Grupos que llegaron con el local lleno y se apuntaron a la lista</span><b id="r-apuntados">96</b></li>
+        <li><span>De esos, los que esperaron y se sentaron</span><b id="r-sentados">71</b></li>
+      </ul>
+
+      <div class="total">
+        <p>Mesas que no se fueron al restaurante de al lado</p>
+        <strong id="r-total">3.266 €</strong>
+        <p id="r-cuenta">71 mesas a 46 € de ticket medio.</p>
+        <label class="ticket" for="ticket"><span>Pon tu ticket medio por mesa</span>
+          <span class="ticket-campo"><input id="ticket" type="number" inputmode="numeric" min="1" max="500" step="1" value="46" aria-describedby="r-cuenta"> €</span>
+        </label>
+      </div>
+
+      <h2>Cuándo te llenas</h2>
+      <div class="semana" role="img" aria-label="Servicios completos por día de la semana: lunes 0, martes 1, miércoles 1, jueves 2, viernes 6, sábado 8, domingo 5">
+        <div class="flojo" data-n="0" style="height:0%"></div>
+        <div class="flojo" data-n="1" style="height:12.5%"></div>
+        <div class="flojo" data-n="1" style="height:12.5%"></div>
+        <div class="flojo" data-n="2" style="height:25%"></div>
+        <div data-n="6" style="height:75%"></div>
+        <div data-n="8" style="height:100%"></div>
+        <div data-n="5" style="height:62.5%"></div>
+      </div>
+      <p class="semana-dias" aria-hidden="true"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></p>
+      <p class="nota">Casi todo cae de viernes a domingo. De lunes a jueves siempre hubo mesa: ahí es donde cabe una oferta.</p>
+
+      <h2>Qué tienes cada mes</h2>
+      <ul class="incluye">
+        <li>Tu web, con el cartel en vivo.</li>
+        <li>El panel de sala: tres botones en el móvil, sin instalar nada.</li>
+        <li>La lista de espera, con aviso por WhatsApp.</li>
+        <li>Este resumen, el día 1 de cada mes.</li>
+      </ul>
+
+    </div></div>
+  </section>
+
+</main>
+
+<nav class="pestanas" aria-label="Pantallas de la demostración">
+  <button type="button" data-vista="cliente" aria-current="true"><i class="punto" id="punto"></i>Cliente</button>
+  <button type="button" data-vista="sala" aria-current="false">Sala<span class="cuantos-esperan" id="cuantos-pestana" hidden>0</span></button>
+  <button type="button" data-vista="resumen" aria-current="false">Resumen</button>
+</nav>
+
+<div class="tostada" id="tostada" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+'use strict';
+
+const MIN = 60000;
+const CADUCA = 45 * MIN;              // sin tocar el cartel este tiempo, la web deja de enseñarlo
+const CLAVE = 'hay-mesa-demo-1';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const sinMovimiento = matchMedia('(prefers-reduced-motion: reduce)');
+const ancho = matchMedia('(min-width: 1080px)');   // en el ordenador se ven las tres pantallas a la vez
+
+/* Nombre del local: con ?local=Casa%20Paco la demo sale con el nombre del restaurante al que se la enseñas */
+const pedido = new URLSearchParams(location.search).get('local');
+const LOCAL = (pedido || '').replace(/\s+/g, ' ').trim().slice(0, 40) || 'La Loza';
+$$('[data-local]').forEach(e => { e.textContent = LOCAL; });
+
+/* ── Estado ─────────────────────────────────────────────────────────────── */
+const CARTELES = ['hay', 'ultimas', 'completo'];
+const nuevo = () => ({
+  cartel: 'hay', desde: Date.now() - 3 * MIN, proxima: null,
+  lista: [], mio: null, n: 1,
+  desfase: 0,                 // minutos adelantados con el botón de la demo
+  sembrada: false,            // ya han «llegado» los grupos de ejemplo
+  apuntados: 0, sentados: 0,  // lo que suma esta sesión al resumen
+  ticket: 46, tocado: Date.now(),
+});
+function leer() {
+  try {
+    const e = JSON.parse(localStorage.getItem(CLAVE));
+    if (e && CARTELES.includes(e.cartel) && Array.isArray(e.lista) && Date.now() - e.tocado < 10 * MIN) return Object.assign(nuevo(), e);
+  } catch (_) { /* sin almacenamiento: la demo funciona igual, sin recordar */ }
+  return null;
+}
+let E = leer() || nuevo();
+function guardar() {
+  E.tocado = Date.now();
+  try { localStorage.setItem(CLAVE, JSON.stringify(E)); } catch (_) {}
+}
+
+const ahora = () => Date.now() + E.desfase;
+const caducado = () => ahora() - E.desde > CADUCA;
+const clave = () => (caducado() ? 'caducado' : E.cartel);
+const hhmm = t => new Date(t).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+const minutos = t => Math.max(0, Math.floor((ahora() - t) / MIN));
+const hace = t => { const m = minutos(t); return m < 1 ? 'ahora mismo' : m < 60 ? `hace ${m} min` : 'hace más de una hora'; };
+const miles = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+function textoProxima() {
+  if (E.proxima == null) return 'Apúntate a la lista y te avisamos.';
+  const t = Math.ceil((E.desde + E.proxima * MIN) / (5 * MIN)) * 5 * MIN;
+  return t > ahora() ? `Próxima mesa sobre las ${hhmm(t)}.` : 'La próxima mesa está al caer.';
+}
+
+/* ── Avisos de la demostración ──────────────────────────────────────────── */
+const tostada = $('#tostada');
+let relojTostada;
+function avisar(texto) {
+  tostada.textContent = texto;
+  tostada.classList.add('visible');
+  clearTimeout(relojTostada);
+  relojTostada = setTimeout(() => tostada.classList.remove('visible'), 3600);
+}
+
+/* ── 1. Cliente ─────────────────────────────────────────────────────────── */
+const placa = $('#placa');
+const TITULOS = { hay: 'Hay mesa ahora', ultimas: 'Últimas mesas', completo: 'Completo ahora', caducado: 'Llámanos' };
+const BOTONES = {
+  hay:      [['wa', 'Reservar por WhatsApp'], ['llamar', 'Llamar']],
+  ultimas:  [['llamar', 'Llamar ahora'], ['wa', 'Reservar por WhatsApp']],
+  completo: [['apuntar', 'Apuntarme a la lista de espera'], ['otro-dia', 'Reservar para otro día']],
+  caducado: [['llamar', 'Llamar'], ['wa', 'Reservar por WhatsApp']],
+};
+let pintado = null;        // lo que enseña ahora mismo la placa
+let girando = false;
+let formAbierto = false;
+
+function pintarCliente() {
+  const k = clave();
+  pintado = k;
+  placa.className = 'placa ' + k;
+  $('#placa-titulo').textContent = TITULOS[k];
+  $('#placa-detalle').textContent = {
+    hay: 'Ven cuando quieras.',
+    ultimas: 'Llama y te guardamos una.',
+    completo: textoProxima(),
+    caducado: 'Te decimos al momento si hay mesa.',
+  }[k];
+  $('#placa-pie').hidden = k === 'caducado';
+  $('#placa-hora').textContent = 'Lo ha marcado la sala ' + hace(E.desde);
+
+  const yo = E.lista.find(x => x.id === E.mio);
+  const [uno, dos] = BOTONES[k];
+  const b1 = $('#accion-1'), b2 = $('#accion-2');
+  b1.dataset.accion = uno[0]; b1.textContent = uno[1];
+  b2.dataset.accion = dos[0]; b2.textContent = dos[1];
+  const form = $('#apuntarse');
+  const verForm = formAbierto && k === 'completo' && !yo;
+  form.hidden = !verForm;
+  b1.hidden = k === 'completo' && (verForm || !!yo);
+
+  const turno = $('#mi-turno');
+  turno.hidden = !yo;
+  if (yo) {
+    turno.classList.toggle('lista-ya', !!yo.avisado);
+    $('[data-accion="salir"]', turno).hidden = !!yo.avisado;
+    if (yo.avisado) {
+      $('#mi-turno-titulo').textContent = 'Tu mesa está lista';
+      $('#mi-turno-texto').textContent = `${yo.nombre}, pasa cuando quieras: te esperamos en la puerta.`;
+    } else {
+      const delante = E.lista.indexOf(yo);
+      $('#mi-turno-titulo').textContent = `Estás en la lista, ${yo.nombre}`;
+      $('#mi-turno-texto').textContent = (delante === 0 ? 'Sois los siguientes.' : delante === 1 ? 'Tenéis un grupo delante.' : `Tenéis ${delante} grupos delante.`)
+        + ' Te avisamos por WhatsApp en cuanto tu mesa esté lista.';
+    }
+  }
+}
+
+/* Cuando cambia el cartel, la placa se da la vuelta como la de la puerta */
+function actualizarCliente() {
+  const k = clave();
+  if (pintado === null || k === pintado) { pintarCliente(); return; }
+  if (!(ancho.matches || vista === 'cliente')) return;      // se gira al volver a la pantalla
+  if (sinMovimiento.matches || !placa.animate) { pintarCliente(); return; }
+  if (girando) return;
+  girando = true;
+  const ida = placa.animate(
+    [{ transform: 'perspective(900px) rotateX(0deg)' }, { transform: 'perspective(900px) rotateX(-90deg)' }],
+    { duration: 210, easing: 'cubic-bezier(.55,0,.9,.45)', fill: 'forwards' });
+  ida.onfinish = () => {
+    pintarCliente();
+    const vuelta = placa.animate(
+      [{ transform: 'perspective(900px) rotateX(90deg)' }, { transform: 'perspective(900px) rotateX(0deg)' }],
+      { duration: 440, easing: 'cubic-bezier(.2,.8,.25,1.2)' });
+    ida.cancel();
+    vuelta.onfinish = () => { girando = false; if (clave() !== pintado) actualizarCliente(); };
+  };
+}
+
+/* «Cuándo venir»: afluencia habitual por horas (en la web real sale de lo que marcó la sala las últimas semanas) */
+function pintarAfluencia() {
+  const hoy = new Date(ahora());
+  const dia = hoy.getDay();
+  const fuerte = dia === 5 || dia === 6 || dia === 0;
+  const nombre = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'][dia];
+  const datos = fuerte
+    ? { Comida: [[13, .45], [14, .95], [15, 1], [16, .6]], Cena: [[20, .4], [21, .9], [22, 1], [23, .55]] }
+    : { Comida: [[13, .3], [14, .7], [15, .75], [16, .35]], Cena: [[20, .2], [21, .55], [22, .6], [23, .25]] };
+  $('#cuando-dia').textContent = `Así suele estar un ${nombre}.`;
+  $('#consejo').textContent = fuerte
+    ? 'Antes de las 14:00 y a partir de las 23:00 casi siempre hay mesa. En hora punta, mejor reserva.'
+    : 'Entre semana casi siempre hay mesa. Si vienes a las 15:00, reserva y te la guardamos.';
+  const caja = $('#afluencia');
+  caja.textContent = '';
+  for (const [turno, horas] of Object.entries(datos)) {
+    const bloque = document.createElement('div'); bloque.className = 'turno';
+    const h = document.createElement('h3'); h.textContent = turno;
+    const barras = document.createElement('div'); barras.className = 'barras';
+    const pie = document.createElement('div'); pie.className = 'horas';
+    for (const [hora, nivel] of horas) {
+      const b = document.createElement('div');
+      b.className = 'barra' + (nivel > .85 ? ' n3' : nivel >= .5 ? ' n2' : '') + (hoy.getHours() === hora ? ' ahora' : '');
+      b.style.height = Math.round(nivel * 100) + '%';
+      const t = document.createElement('span'); t.textContent = hora + ' h';
+      barras.append(b); pie.append(t);
+    }
+    bloque.append(h, barras, pie);
+    caja.append(bloque);
+  }
+}
+
+/* ── 2. Sala ────────────────────────────────────────────────────────────── */
+const vistos = new Set();
+let primeraLista = true;
+function crear(tag, clase, texto) {
+  const e = document.createElement(tag);
+  if (clase) e.className = clase;
+  if (texto != null) e.textContent = texto;
+  return e;
+}
+function botonFila(texto, accion, id, clase) {
+  const b = crear('button', 'boton-chico ' + clase, texto);
+  b.type = 'button'; b.dataset.accion = accion; b.dataset.id = id;
+  return b;
+}
+function pintarSala() {
+  const cad = caducado();
+  $('#reloj').textContent = hhmm(ahora());
+  $$('.cartel-boton').forEach(b => {
+    const puesto = b.dataset.cartel === E.cartel;
+    b.setAttribute('aria-pressed', String(puesto));
+    b.classList.toggle('caducado', puesto && cad);
+    $('.sub', b).textContent = puesto ? (cad ? 'Sin tocar desde hace un rato' : 'Esto dice tu web ahora') : '';
+  });
+  $('#proxima').hidden = E.cartel !== 'completo';
+  $$('.ficha').forEach(f => {
+    const v = f.dataset.min === '' ? null : Number(f.dataset.min);
+    f.setAttribute('aria-pressed', String(v === E.proxima));
+  });
+  $('#frescura').classList.toggle('caducada', cad);
+  $('#frescura-texto').textContent = cad
+    ? `Lleva ${minutos(E.desde)} min sin tocarse. Tu web ya no lo enseña: pide que llamen.`
+    : `Puesto ${hace(E.desde)}. A los 45 min sin tocarlo, tu web pide que llamen.`;
+
+  const ul = $('#espera');
+  ul.textContent = '';
+  E.lista.forEach(x => {
+    const li = crear('li');
+    if (!vistos.has(x.id)) { vistos.add(x.id); if (!primeraLista) li.className = 'nueva'; }
+    const info = crear('div');
+    const gente = x.personas === 1 ? '1 persona' : `${x.personas} personas`;
+    const m = minutos(x.t);
+    info.append(crear('p', 'quien', x.nombre),
+      crear('p', 'dato', x.avisado ? `${gente}, avisado ${hhmm(x.avisado)}` : `${gente}, ${m < 1 ? 'acaba de apuntarse' : 'espera ' + m + ' min'}`));
+    const acciones = crear('div', 'fila-acciones');
+    if (x.avisado) acciones.append(botonFila('No vino', 'quitar', x.id, 'sin'), botonFila('Sentados', 'sentar', x.id, 'lleno'));
+    else acciones.append(botonFila('Avisar', 'avisar', x.id, 'lleno'));
+    li.append(info, acciones);
+    ul.append(li);
+  });
+  primeraLista = false;
+  $('#espera-vacia').hidden = E.lista.length > 0;
+  $('#espera-vacia').textContent = E.cartel === 'completo'
+    ? 'Nadie esperando todavía. Tus clientes ya pueden apuntarse desde la web.'
+    : 'Nadie esperando. Cuando marques Completo, tus clientes podrán apuntarse desde la web.';
+  for (const id of ['#cuantos-lista', '#cuantos-pestana']) {
+    $(id).hidden = E.lista.length === 0;
+    $(id).textContent = E.lista.length;
+  }
+}
+
+/* Al marcar Completo por primera vez, se apuntan dos grupos de ejemplo, como pasaría un viernes */
+let llegadas = [];
+function sembrar() {
+  if (E.sembrada) return;
+  E.sembrada = true;
+  llegadas = [['Marta', 4, 4500], ['Íñigo', 2, 11000]].map(([nombre, personas, espera]) => setTimeout(() => {
+    if (E.cartel !== 'completo') return;
+    E.lista.push({ id: E.n++, nombre, personas, t: ahora(), avisado: null });
+    E.apuntados++;
+    guardar(); pintar();
+  }, espera));
+}
+
+/* ── 3. Resumen ─────────────────────────────────────────────────────────── */
+function pintarResumen() {
+  const mes = new Date().toLocaleDateString('es-ES', { month: 'long' });
+  $('#mes').textContent = mes.charAt(0).toUpperCase() + mes.slice(1);
+  const sentados = 71 + E.sentados;
+  $('#r-apuntados').textContent = miles(96 + E.apuntados);
+  $('#r-sentados').textContent = miles(sentados);
+  $('#r-total').textContent = miles(sentados * E.ticket) + ' €';
+  $('#r-cuenta').textContent = `${sentados} mesas a ${E.ticket} € de ticket medio.`;
+  const campo = $('#ticket');
+  if (document.activeElement !== campo) campo.value = E.ticket;
+}
+
+/* ── Pantallas ──────────────────────────────────────────────────────────── */
+let vista = 'cliente';
+const alturas = { cliente: 0, sala: 0, resumen: 0 };
+function irA(v) {
+  if (v === vista) return;
+  alturas[vista] = window.scrollY;
+  vista = v;
+  $$('.vista').forEach(s => s.classList.toggle('activa', s.id === 'vista-' + v));
+  $$('.pestanas button').forEach(b => b.setAttribute('aria-current', String(b.dataset.vista === v)));
+  $$('#aviso span').forEach(s => { s.hidden = s.dataset.vista !== v; });
+  const cambio = v === 'cliente' && pintado !== null && clave() !== pintado;
+  window.scrollTo(0, cambio ? 0 : alturas[v]);
+  if (cambio) setTimeout(actualizarCliente, 380); else pintar();
+}
+
+function pintar() {
+  actualizarCliente();
+  pintarSala();
+  pintarResumen();
+  $('#punto').className = 'punto ' + clave();
+}
+
+/* ── Lo que se toca ─────────────────────────────────────────────────────── */
+const TEXTOS = {
+  wa: 'En tu web, este botón abre WhatsApp con la reserva ya escrita.',
+  llamar: 'En tu web, este botón llama al restaurante.',
+  'otro-dia': 'En tu web, este botón abre WhatsApp para reservar otro día.',
+  carta: 'Aquí va tu carta completa.',
+  mapa: 'En tu web, este botón abre Google Maps con la ruta.',
+};
+
+document.addEventListener('click', ev => {
+  const pestana = ev.target.closest('.pestanas button');
+  if (pestana) { irA(pestana.dataset.vista); return; }
+
+  const ancla = ev.target.closest('.web-cabecera nav a');
+  if (ancla) {
+    ev.preventDefault();
+    $(ancla.getAttribute('href')).scrollIntoView({ behavior: sinMovimiento.matches ? 'auto' : 'smooth', block: 'start' });
+    return;
+  }
+
+  const b = ev.target.closest('[data-accion]');
+  if (!b) return;
+  const accion = b.dataset.accion;
+  const fila = E.lista.find(x => x.id === Number(b.dataset.id));
+
+  switch (accion) {
+    case 'cartel':
+      if (E.cartel !== b.dataset.cartel) E.proxima = null;
+      E.cartel = b.dataset.cartel;
+      E.desde = ahora();
+      if (E.cartel === 'completo') sembrar();
+      break;
+    case 'proxima':
+      E.proxima = b.dataset.min === '' ? null : Number(b.dataset.min);
+      E.desde = ahora();
+      break;
+    case 'renovar':
+      E.desde = ahora();
+      avisar('Renovado. Tu web lo vuelve a enseñar 45 minutos más.');
+      break;
+    case 'avisar':
+      if (!fila) return;
+      fila.avisado = ahora();
+      avisar('En el móvil de la sala se abre WhatsApp con el aviso ya escrito.');
+      break;
+    case 'sentar':
+      if (!fila) return;
+      E.lista = E.lista.filter(x => x !== fila);
+      if (E.mio === fila.id) E.mio = null;
+      E.sentados++;
+      avisar('Sentados. Esa mesa ya cuenta en el resumen del mes.');
+      break;
+    case 'quitar':
+      if (!fila) return;
+      E.lista = E.lista.filter(x => x !== fila);
+      if (E.mio === fila.id) E.mio = null;
+      break;
+    case 'adelantar':
+      E.desfase += CADUCA + MIN;
+      avisar('Han pasado 45 minutos sin tocar el cartel. Mira ahora la pantalla del cliente.');
+      break;
+    case 'reiniciar': {
+      llegadas.forEach(clearTimeout);
+      const ticket = E.ticket;
+      E = nuevo(); E.ticket = ticket;
+      formAbierto = false; vistos.clear();
+      $('#ap-nombre').value = ''; $('#ap-movil').value = ''; $('#ap-personas').textContent = '2';
+      avisar('Demostración a cero: hay mesa y nadie en la lista.');
+      break;
+    }
+    case 'apuntar':
+      formAbierto = true;
+      pintarCliente();
+      $('#ap-nombre').focus({ preventScroll: true });
+      $('#apuntarse').scrollIntoView({ behavior: sinMovimiento.matches ? 'auto' : 'smooth', block: 'center' });
+      return;
+    case 'cerrar-form':
+      formAbierto = false;
+      pintarCliente();
+      return;
+    case 'menos':
+    case 'mas': {
+      const salida = $('#ap-personas');
+      salida.textContent = Math.min(12, Math.max(1, Number(salida.textContent) + (accion === 'mas' ? 1 : -1)));
+      return;
+    }
+    case 'salir':
+      E.lista = E.lista.filter(x => x.id !== E.mio);
+      E.mio = null;
+      break;
+    default:
+      if (TEXTOS[accion]) avisar(TEXTOS[accion]);
+      return;
+  }
+  guardar();
+  pintar();
+});
+
+$('#apuntarse').addEventListener('submit', ev => {
+  ev.preventDefault();
+  const campo = $('#ap-nombre');
+  const nombre = campo.value.replace(/\s+/g, ' ').trim().slice(0, 24);
+  $('#ap-error').hidden = !!nombre;
+  if (!nombre) { campo.focus(); return; }
+  // El móvil no se guarda: en la demo no hace falta y es un dato personal
+  const yo = { id: E.n++, nombre, personas: Number($('#ap-personas').textContent), t: ahora(), avisado: null };
+  E.lista.push(yo);
+  E.mio = yo.id;
+  E.apuntados++;
+  formAbierto = false;
+  campo.value = ''; $('#ap-movil').value = '';
+  guardar(); pintar();
+  avisar('Apuntado. En la pantalla de Sala ya aparece en la lista.');
+});
+$('#ap-nombre').addEventListener('input', () => { $('#ap-error').hidden = true; });
+
+$('#ticket').addEventListener('input', ev => {
+  const v = Math.round(Number(ev.target.value));
+  if (!(v >= 1 && v <= 500)) return;
+  E.ticket = v;
+  guardar(); pintarResumen();
+});
+$('#ticket').addEventListener('blur', ev => { ev.target.value = E.ticket; });
+
+/* Dos ventanas abiertas (la web en una y la sala en otra) se enteran la una de la otra */
+addEventListener('storage', ev => {
+  if (ev.key !== CLAVE || !ev.newValue) return;
+  try { E = Object.assign(nuevo(), JSON.parse(ev.newValue)); pintar(); } catch (_) {}
+});
+/* Si la demo se quedó abierta de otro día, al volver empieza limpia */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) return;
+  if (Date.now() - E.tocado > 120 * MIN) { const ticket = E.ticket; E = nuevo(); E.ticket = ticket; pintado = null; }
+  pintar();
+});
+ancho.addEventListener('change', pintar);
+setInterval(pintar, 15000);
+
+pintarAfluencia();
+pintar();
+})();
+</script>
+</body>
+</html>
